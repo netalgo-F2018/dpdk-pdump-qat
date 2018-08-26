@@ -11,10 +11,6 @@
 #include <net/if.h>
 
 #include <pcap.h>
-#ifdef RTE_LIBRTE_PMD_PCAP_COMP
-#include <stdio.h>
-#include <zlib.h>
-#endif
 
 #include <rte_cycles.h>
 #include <rte_ethdev_driver.h>
@@ -23,6 +19,10 @@
 #include <rte_malloc.h>
 #include <rte_mbuf.h>
 #include <rte_bus_vdev.h>
+
+#ifdef RTE_LIBRTE_PMD_PCAP_COMP
+#include "qc/qzip_cookie.h"
+#endif
 
 #define RTE_ETH_PCAP_SNAPSHOT_LEN 65535
 #define RTE_ETH_PCAP_SNAPLEN ETHER_MAX_JUMBO_FRAME_LEN
@@ -110,32 +110,6 @@ static int eth_pcap_logtype;
 #define PMD_LOG(level, fmt, args...) \
 	rte_log(RTE_LOG_ ## level, eth_pcap_logtype, \
 		"%s(): " fmt "\n", __func__, ##args)
-
-#ifdef RTE_LIBRTE_PMD_PCAP_COMP
-static ssize_t
-gzip_cookie_read(void *cookie, char *buf, size_t size)
-{
-	return gzread((gzFile)cookie, (voidp)buf, (unsigned)size);
-}
-
-static ssize_t
-gzip_cookie_write(void *cookie, const char *buf, size_t size)
-{
-	return gzwrite((gzFile)cookie, (voidpc)buf, (unsigned)size);
-}
-
-static int
-gzip_cookie_close(void *cookie)
-{
-	return gzclose((gzFile)cookie);
-}
-
-static cookie_io_functions_t gzip_rw_funcs = {
-	.read = gzip_cookie_read,
-	.write = gzip_cookie_write,
-	.close = gzip_cookie_close
-};
-#endif
 
 static int
 eth_pcap_rx_jumbo(struct rte_mempool *mb_pool, struct rte_mbuf *mbuf,
@@ -403,17 +377,14 @@ open_single_iface(const char *iface, pcap_t **pcap)
 }
 
 #ifdef RTE_LIBRTE_PMD_PCAP_COMP
-static char mybuf[1024];
 static pcap_dumper_t *
 pcap_dump_open_comp(pcap_t *p, const char *fname)
 {
-	gzFile	zf;
-	FILE	*fp;
+	// TODO: you code here that replaces `gzip_fopen` with `qzip_fopen` to
+	//       use QAT to accelerate this compression process.
+	FILE *gz_fout = gzip_fopen(fname, "w");
 
-	sprintf(mybuf, "%s.gz", fname);
-	zf = gzopen(mybuf, "w");
-	fp = fopencookie(zf, "w", gzip_rw_funcs);
-	return pcap_dump_fopen(p, fp);
+	return pcap_dump_fopen(p, gz_fout);
 }
 #endif
 

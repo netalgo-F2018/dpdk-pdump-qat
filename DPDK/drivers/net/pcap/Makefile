@@ -10,6 +10,18 @@ include $(RTE_SDK)/mk/rte.vars.mk
 #
 LIB = librte_pmd_pcap.a
 
+ifeq ($(CONFIG_RTE_LIBRTE_PMD_PCAP_COMP),y)
+# \begin QAT-related CFLAGS & LDLIBS
+QAT_INCLUDE	= -I$(ICP_ROOT)/quickassist/include 		\
+		  -I$(ICP_ROOT)/quickassist/include/dc 		\
+		  -I$(ICP_ROOT)/quickassist/lookaside/access_layer/include
+USDM_INCLUDE	= -I$(ICP_ROOT)/quickassit/utilities/libusdm_drv
+QATZIP_INCLUDE	= -I$(QATZIP_ROOT)/include -I$(QATZIP_ROOT)/src
+CFLAGS		+= $(QAT_INCLUDE) $(USDM_INCLUDE) $(QATZIP_INCLUDE)
+LDLIBS		+= -lqatzip -lz
+# \end QAT-related CFLAGS & LDLIBS
+endif
+
 CFLAGS += -O3
 CFLAGS += $(WERROR_FLAGS)
 LDLIBS += -lpcap
@@ -24,6 +36,10 @@ LIBABIVER := 1
 #
 # all source are stored in SRCS-y
 #
+ifeq ($(CONFIG_RTE_LIBRTE_PMD_PCAP_COMP),y)
+SRCS-$(CONFIG_RTE_LIBRTE_PMD_PCAP) += qc/qzip_cookie.c
+endif
+
 SRCS-$(CONFIG_RTE_LIBRTE_PMD_PCAP) += rte_eth_pcap.c
 
 #

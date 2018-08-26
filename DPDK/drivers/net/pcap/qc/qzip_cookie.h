@@ -2,7 +2,6 @@
 #define _QZIP_COOKIE_H
 
 #define _GNU_SOURCE     // To enable fopencookie()
-#define _POSIX_C_SOURCE // To enable fileno()
 #include <stdio.h>
 
 #define QC_PRINT(fmt, args...) { printf(" INFO: " fmt, ##args); }
