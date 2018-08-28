@@ -4,12 +4,8 @@ set -euo pipefail
 
 RTE_TARGET=build
 RTE_SDK=$(pwd)/DPDK
-
-PCAP_CALGARY_3M=calgary3M.pcap
 PCAP_CALGARY_1G=calgary1G.pcap
-
 TESTPMD=$RTE_SDK/$RTE_TARGET/app/testpmd 
-
 CALGARY_URL=http://www.data-compression.info/files/corpora/largecalgarycorpus.zip
 
 function gen_calgary3M
@@ -50,14 +46,10 @@ function gen_pcap
     kill -INT $tcpdump_pid
 }
 
-#test -e $PCAP_CALGARY_3M || ((test -e calgary3M || gen_calgary3M) && gen_pcap calgary3M)
 test -e $PCAP_CALGARY_1G || ((test -e calgary1G || gen_calgary1G) && gen_pcap calgary1G)
 
-#$TESTPMD -c 0xf -n 4 --vdev 'eth_pcap0,rx_pcap=calgary3M.pcap,tx_pcap=calgary3M.pcap.gz' -- --port-topology=chained --stats-period=1 --auto-start
-#$TESTPMD -c 0xf -n 4 --vdev 'eth_pcap0,rx_pcap=calgary1G.pcap,tx_pcap=calgary1G.pcap.gz' -- --port-topology=chained --stats-period=1 --auto-start
-#stdbuf -o0 $TESTPMD -c 0xf -n 4 --vdev 'eth_pcap0,rx_pcap=calgary1G.pcap,tx_pcap=calgary1G.pcap.gz' -- --port-topology=chained --stats-period=1 --auto-start | \
-#    stdbuf -i0 -o0 tee test_pmd_pcap_dc.sh.stdout
-$TESTPMD -c 0xf -n 4 --vdev 'eth_pcap0,rx_pcap=calgary1G.pcap,tx_pcap=calgary1G.pcap.gz' -- --port-topology=chained --stats-period=1 & testpmd_pid=$!
+$TESTPMD -c 0xf -n 4 --no-pci --vdev 'eth_pcap0,rx_pcap=calgary1G.pcap,tx_pcap=calgary1G.pcap.gz' -- --port-topology=chained --stats-period=1 & testpmd_pid=$!
+#$TESTPMD -c 0xf -n 4 --vdev 'eth_pcap0,rx_pcap=calgary1G.pcap,tx_pcap=calgary1G.pcap.gz' -- --portmask=0x1 --port-topology=chained --stats-period=1 & testpmd_pid=$!
 sleep 10
 kill -INT $testpmd_pid
 
