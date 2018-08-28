@@ -10,13 +10,16 @@ CALGARY_URL=http://www.data-compression.info/files/corpora/largecalgarycorpus.zi
 
 function gen_calgary3M
 {
-    wget -O /tmp/largecalgary.zip $CALGARY_URL && \
-        unzip -c /tmp/largecalgary.zip "*" > calgary3M && \
-        rm /tmp/largecalgary.zip
+    local temp_calgary_zip=$(mktemp)
+    wget -O $temp_calgary_zip $CALGARY_URL && \
+        unzip -c $temp_calgary_zip "*" > calgary3M && \
+        rm -f $temp_calgary_zip
 }
 
 function gen_calgary1G
 {
+    test -e gen_calgary3M || gen_calgary3M
+
     local calgary_sz=$(du calgary3M | awk '{ print $1 }')
     local nr_repeats=$(($((1*1024*1024)) / calgary_sz))
 
@@ -36,10 +39,12 @@ function gen_pcap
 
     python -m SimpleHTTPServer 65535 --bind 127.0.0.1 & http_server_pid=$!
     # Refer to https://askubuntu.com/questions/746029/how-to-start-and-kill-tcpdump-within-a-script
-    rm -f ${dataset_id}.pcap && tcpdump -U -i lo -s 1500 -w ${dataset_id}.pcap 'port 65535' & tcpdump_pid=$!
-    sleep 5
+    rm -f ${dataset_id}.pcap
+    tcpdump -U -i lo -s 1500 -w ${dataset_id}.pcap 'port 65535' & tcpdump_pid=$!
+    sleep 3
 
     wget -qO /dev/null http://127.0.0.1:65535/${dataset_id}
+    sleep 10
 
     kill $http_server_pid
     sleep 5

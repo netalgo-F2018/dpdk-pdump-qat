@@ -1,0 +1,27 @@
+#!/bin/bash
+
+set -euo pipefail
+
+function app_echo
+{
+    local msg=${1:-}
+    echo "$(hostname): REMOTE: $msg"
+}
+
+function print_usage_then_die
+{
+    app_echo "Usage: $0 <host> <path_to_script> [script_args...]"
+    exit 1
+}
+
+QAT_SERVER=${1:-}
+SCRIPT_TO_RUN=${2:-}
+SCRIPT_ARGS=${3:-}
+TEMP_FILE=$(mktemp)
+
+[[ -z "$QAT_SERVER" ]] && print_usage_then_die
+app_echo "Do execute cmd: $0 $QAT_SERVER $SCRIPT_TO_RUN $SCRIPT_ARGS"
+
+cat $SCRIPT_TO_RUN | ssh $QAT_SERVER "cat > $TEMP_FILE && bash $TEMP_FILE $SCRIPT_ARGS && rm $TEMP_FILE"
+
+exit 0
