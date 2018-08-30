@@ -94,7 +94,6 @@ inline void def(char *buf, size_t size, FILE *fout, int chunk_size)
 {
     size_t bytes_to_write, bytes_written, off;
 
-    // BUGON here: infinite loop
     for (off = 0; off < size; off += chunk_size) {
         bytes_to_write = ((size - off) < chunk_size) ? (size - off) : chunk_size;
         bytes_written  = fwrite(buf + off, 1, bytes_to_write, fout);

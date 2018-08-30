@@ -15,7 +15,7 @@ qzip_cookie_test: qzip_cookie_test.c qzip_cookie.c
 	$(CC) $^ -o $@ $(CFLAGS) $(LDLIBS)
 
 calgary:
-	./gen_calgary.sh
+	bash gen_calgary.sh
 
 cscope:
 	cscope -bqR
