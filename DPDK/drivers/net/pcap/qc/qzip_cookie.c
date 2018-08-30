@@ -70,10 +70,9 @@ qzip_cookie_write(void *cookie, const char *buf, size_t size)
     QzSession_T *qz_sess     = &(qz_cookie->qz_sess);
 
     // TODO: your code here.
-    // References:
-    //  - code example: QATzip/utils/qzip.c: doProcessFile(...)
+    // You can refer to code in QATzip/utils/qzip.c: doProcessFile(...).
 
-    // Fake
+    // Use size of handled data as return value.
     return size;
 }
 
@@ -161,7 +160,10 @@ qzip_fopen(const char *fname, const char *mode)
 
     FILE *cookie_fp = fopencookie(qz_cookie, mode, qzip_write_funcs);
     assert(cookie_fp != NULL);
-    // Disable cookie_fp's stream buffer
+    // Disable cookie_fp's stream buffer to eliminate unnecessary memory copy
+    // References:
+    //  - http://www.pixelbeat.org/programming/stdio_buffering/
+    //  - https://en.wikibooks.org/wiki/C_Programming/stdio.h/setvbuf
     rc = setvbuf(cookie_fp, NULL, _IONBF, 0);
     assert(rc == 0);
 
