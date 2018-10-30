@@ -15,8 +15,8 @@ set -ueo pipefail
 
 NR_LOOP=${NR_LOOP:-0}
 CMD=${1:-test}
-ALICE=${2:-qat0}
-BOB=${3:-qat1}
+ALICE=${2:-}
+BOB=${3:-}
 
 function app_echo
 {
@@ -29,6 +29,8 @@ function print_usage_then_die
     app_echo "Usage: $0 <command> <sender> <receiver>"
     exit 1
 }
+
+([[ -z "$ALICE" ]] || [[ -z "$BOB" ]]) && print_usage_then_die
 
 app_echo "Do execute cmd: env NR_LOOP=$NR_LOOP $0 $CMD $ALICE $BOB"
 

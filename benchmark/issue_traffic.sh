@@ -1,6 +1,7 @@
 #!/bin/bash
 
-PKTGEN_DIR=/root/workspace/dpdk-pktgen/
+#PKTGEN_DIR=/root/workspace/dpdk-pktgen/
+PKTGEN_DIR=/opt/dpdk-pktgen/
 
 NR_LOOP=${1:-0}
 
